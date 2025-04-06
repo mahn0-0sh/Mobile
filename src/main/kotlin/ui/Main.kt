@@ -6,68 +6,73 @@ fun main() = runBlocking {
     while (true) {
         println(
             """
-            |== منوی اصلی ==
-            |1️⃣ دریافت اطلاعات کاربر گیت‌هاب
-            |2️⃣ نمایش لیست کاربران ذخیره شده
-            |3️⃣ جستجوی کاربر بر اساس نام
-            |4️⃣ جستجو بر اساس نام ریپوزیتوری
-            |5️⃣ خروج
+            |Main Menu:
+            |1 - Get User Info
+            |2 - Show Saved User Info
+            |3 - Search User by Name
+            |4 - Search by Repository
+            |5 - Exit
         """.trimMargin()
         )
 
         when (readLine()?.trim()) {
             "1" -> {
-                print("🔎 نام کاربری را وارد کنید: ")
+                print("🔎 Enter Username: ")
                 val username = readLine()!!
                 try {
                     val (user, repos) = repo.getUserWithRepos(username)
-                    println("✅ نام کاربری: ${user.login}")
-                    println("👥 فالوورها: ${user.followers}, فالووینگ: ${user.following}")
-                    println("📅 تاریخ ساخت اکانت: ${user.created_at}")
-                    println("📁 ریپوزیتوری‌ها:")
+                    println("Username: ${user.login}")
+                    println(" Followers: ${user.followers}, Followings: ${user.following}")
+                    println(" Date: ${user.created_at}")
+                    println(" Repositories:")
                     repos.forEach { println("- ${it.name}: ${it.html_url}") }
                 } catch (e: Exception) {
-                    println("❌ خطا در دریافت اطلاعات: ${e.message}")
+                    println("❌ Error in finding user: ${e.message}")
                 }
             }
 
             "2" -> {
-                println("📄 لیست کاربران ذخیره شده:")
+                println(" List of saved users:")
                 repo.getAllUsers().forEach {
                     println("- ${it.login}")
                 }
             }
 
             "3" -> {
-                print("🔍 نام کاربری برای جستجو: ")
+                print("Enter username to search: ")
                 val username = readLine()!!
-                val user = repo.findUserByUsername(username)
-                if (user != null)
-                    println("✅ کاربر یافت شد: ${user.login}")
+                //val user = repo.findUserByUsername(username)
+                val (user, repos) = repo.getUserWithRepos(username)
+                if (user != null) {
+                    println("User found: ${user.login}")
+                    println("Followings: ${user.following}")
+                    println("Followers: ${user.followers}")
+                    println("Date: ${user.created_at}")
+                }
                 else
-                    println("❌ کاربر در کش وجود ندارد.")
+                    println("User does not exist in cache memory")
             }
 
             "4" -> {
-                print("🔍 نام ریپوزیتوری برای جستجو: ")
+                print("Enter name of repository to search: ")
                 val repoName = readLine()!!
                 val results = repo.findUsersByRepoName(repoName)
                 if (results.isEmpty()) {
-                    println("❌ موردی یافت نشد.")
+                    println("Not found")
                 } else {
-                    println("📁 نتایج جستجو:")
+                    println("Results:")
                     results.forEach { (user, repo) ->
-                        println("- ${repo.name} (${repo.html_url}) از کاربر ${user.login}")
+                        println("- ${repo.name} (${repo.html_url}) from ${user.login}")
                     }
                 }
             }
 
             "5" -> {
-                println("👋 خروج از برنامه.")
+                println("Bye!")
                 return@runBlocking
             }
 
-            else -> println("❗ گزینه نامعتبر است.")
+            else -> println("Not an option!")
         }
     }
 }
